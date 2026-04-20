@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Пациенты клиники - Qamqor{% endblock %}
+{% block title %}Пациенты клиники - MediPlatform{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -14,6 +14,7 @@
         </div>
     </div>
 
+    <!-- Search -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form method="GET" action="{{ url_for('clinic.patients') }}">
@@ -37,6 +38,7 @@
         </div>
     </div>
 
+    <!-- Patients Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             {% if patients %}

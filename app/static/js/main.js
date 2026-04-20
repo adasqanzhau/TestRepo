@@ -1,9 +1,20 @@
+/**
+ * MediPlatform — Main JavaScript
+ */
+
 document.addEventListener('DOMContentLoaded', function () {
+
+    // ==========================================
+    // Notifications
+    // ==========================================
 
     const notificationBadge = document.getElementById('notificationCount');
     const notificationList = document.getElementById('notificationList');
     const markAllReadBtn = document.getElementById('markAllRead');
 
+    /**
+     * Fetch unread notification count and update the badge.
+     */
     function fetchNotificationCount() {
         fetch('/api/notifications/count')
             .then(function (res) { return res.json(); })
@@ -21,9 +32,13 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(function () { /* silent */ });
     }
 
+    // Initial fetch + poll every 30 seconds
     fetchNotificationCount();
     setInterval(fetchNotificationCount, 30000);
 
+    /**
+     * Load notifications into the dropdown when it's opened.
+     */
     var notifDropdownEl = document.getElementById('notificationsDropdown');
     if (notifDropdownEl) {
         notifDropdownEl.addEventListener('show.bs.dropdown', function () {
@@ -45,6 +60,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         '</div>';
                     return;
                 }
+                // Map DB notification type → (CSS class, icon). The API returns
+                // one of info/success/warning/danger from the Notification model.
                 var TYPE_MAP = {
                     info:    { cls: 'info',    icon: 'fa-info-circle' },
                     success: { cls: 'message', icon: 'fa-check-circle' },
@@ -70,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 notificationList.innerHTML = html;
 
+                // Click handler: mark as read, then navigate to link if present
                 notificationList.querySelectorAll('.notification-item').forEach(function (item) {
                     item.addEventListener('click', function () {
                         var id = this.getAttribute('data-id');
@@ -107,6 +125,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ==========================================
+    // Bootstrap Tooltips & Popovers
+    // ==========================================
+
     var tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltipTriggerList.forEach(function (el) {
         new bootstrap.Tooltip(el);
@@ -116,6 +138,10 @@ document.addEventListener('DOMContentLoaded', function () {
     popoverTriggerList.forEach(function (el) {
         new bootstrap.Popover(el);
     });
+
+    // ==========================================
+    // Auto-dismiss Flash Messages
+    // ==========================================
 
     var flashAlerts = document.querySelectorAll('.flash-alert');
     flashAlerts.forEach(function (alert) {
@@ -128,9 +154,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     });
 
+    // ==========================================
+    // Smooth Scroll
+    // ==========================================
+
     document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
         anchor.addEventListener('click', function (e) {
             var href = this.getAttribute('href');
+            // Skip bare "#" links and Bootstrap data-bs-* controlled elements
             if (!href || href === '#' || href.length < 2) return;
             if (this.hasAttribute('data-bs-toggle') || this.hasAttribute('data-bs-dismiss')) return;
             try {
@@ -140,10 +171,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             } catch (err) {
+                // Invalid selector — ignore
             }
         });
     });
 
+    // ==========================================
+    // Confirm Delete Dialog
+    // ==========================================
+
+    /**
+     * Show a confirm-delete dialog. Returns a Promise that resolves to true/false.
+     * Usage:
+     *   confirmDelete('Вы уверены, что хотите удалить эту запись?').then(function(ok) { ... });
+     */
     window.confirmDelete = function (message, title) {
         return new Promise(function (resolve) {
             var overlay = document.createElement('div');
@@ -180,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // Wire up elements with data-confirm-delete attribute
     document.querySelectorAll('[data-confirm-delete]').forEach(function (el) {
         el.addEventListener('click', function (e) {
             e.preventDefault();
@@ -193,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Wire up forms with data-confirm-delete-form attribute
     document.querySelectorAll('form[data-confirm-delete-form]').forEach(function (form) {
         var confirmed = false;
         form.addEventListener('submit', function (e) {
@@ -208,9 +251,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // ==========================================
+    // Format Dates to Russian Locale
+    // ==========================================
+
     var MONTHS_RU_SHORT = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
     var MONTHS_RU = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 
+    /**
+     * Format ISO date string to Russian locale.
+     * E.g. "2026-03-22T14:30:00" => "22 марта 2026, 14:30"
+     */
     window.formatDateRu = formatDateRu;
 
     function formatDateRu(dateStr) {
@@ -225,6 +276,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return day + ' ' + month + ' ' + year + ', ' + hours + ':' + mins;
     }
 
+    /**
+     * Format date short: "22 мар"
+     */
     window.formatDateShortRu = function (dateStr) {
         if (!dateStr) return '';
         var d = new Date(dateStr);
@@ -232,10 +286,15 @@ document.addEventListener('DOMContentLoaded', function () {
         return d.getDate() + ' ' + MONTHS_RU_SHORT[d.getMonth()];
     };
 
+    // Auto-format elements with data-date attribute
     document.querySelectorAll('[data-date]').forEach(function (el) {
         var raw = el.getAttribute('data-date');
         el.textContent = formatDateRu(raw);
     });
+
+    // ==========================================
+    // Star Rating Widget
+    // ==========================================
 
     document.querySelectorAll('.star-rating').forEach(function (widget) {
         var inputs = widget.querySelectorAll('input[type="radio"]');
@@ -277,6 +336,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    // ==========================================
+    // Utility: Escape HTML
+    // ==========================================
 
     function escapeHtml(str) {
         if (!str) return '';

@@ -9,11 +9,12 @@ app = create_app()
 
 def _seed_demo_data():
     """Create demo accounts if the database is empty (first deploy)."""
-    if User.query.filter_by(email='admin@qamqor.kz').first():
+    # Skip if superadmin already exists
+    if User.query.filter_by(email='admin@mediplatform.kz').first():
         return
 
     admin = User(
-        email='admin@qamqor.kz',
+        email='admin@mediplatform.kz',
         first_name='Администратор',
         last_name='Платформы',
         role='superadmin',
@@ -39,7 +40,7 @@ def _seed_demo_data():
     db.session.flush()
 
     clinic_admin = User(
-        email='clinic@qamqor.kz',
+        email='clinic@mediplatform.kz',
         first_name='Админ',
         last_name='Клиники',
         role='clinic_admin',
@@ -50,7 +51,7 @@ def _seed_demo_data():
     db.session.add(clinic_admin)
 
     doctor = User(
-        email='doctor@qamqor.kz',
+        email='doctor@mediplatform.kz',
         first_name='Арман',
         last_name='Сериков',
         role='doctor',
@@ -65,7 +66,7 @@ def _seed_demo_data():
     db.session.add(doctor)
 
     patient = User(
-        email='patient@qamqor.kz',
+        email='patient@mediplatform.kz',
         first_name='Айгерим',
         last_name='Нурланова',
         role='patient',
@@ -79,6 +80,7 @@ def _seed_demo_data():
     db.session.commit()
 
 
+# Auto-create tables and seed demo data on startup
 with app.app_context():
     db.create_all()
     _seed_demo_data()
@@ -92,17 +94,18 @@ def init_db():
     print('Database initialized successfully!')
     print('')
     print('Demo accounts (see .env-example for passwords):')
-    print('  Superadmin:    admin@qamqor.kz')
-    print('  Clinic Admin:  clinic@qamqor.kz')
-    print('  Doctor:        doctor@qamqor.kz')
-    print('  Patient:       patient@qamqor.kz')
+    print('  Superadmin:    admin@mediplatform.kz')
+    print('  Clinic Admin:  clinic@mediplatform.kz')
+    print('  Doctor:        doctor@mediplatform.kz')
+    print('  Patient:       patient@mediplatform.kz')
 
 
 if __name__ == '__main__':
+    debug = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
     socketio.run(
         app,
+        debug=debug,
         host='0.0.0.0',
         port=int(os.environ.get('PORT', 5051)),
-        debug=False,
-        allow_unsafe_werkzeug=True
+        allow_unsafe_werkzeug=debug,
     )

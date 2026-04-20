@@ -56,6 +56,7 @@
                     <form method="POST" action="{{ url_for('patient.profile') }}" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
 
+                        <!-- Avatar -->
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
                                 {% if current_user.avatar %}
@@ -77,6 +78,7 @@
 
                         <hr>
 
+                        <!-- Personal Info -->
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Email</label>
@@ -144,6 +146,7 @@
 
 {% block extra_js %}
 <script>
+    // Avatar preview
     document.getElementById('avatar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {

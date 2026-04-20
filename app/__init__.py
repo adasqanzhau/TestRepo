@@ -25,7 +25,14 @@ def create_app(config_class=Config):
     allowed_origins = cors_env.split(',') if cors_env else '*'
 
     # Auto-detect async mode: gevent for production, threading for local dev
-    async_mode = "threading"
+    async_mode = os.environ.get('SOCKETIO_ASYNC_MODE', '')
+    if not async_mode:
+        try:
+            import gevent          # noqa: F401
+            import geventwebsocket  # noqa: F401
+            async_mode = 'gevent'
+        except ImportError:
+            async_mode = 'threading'
 
     # manage_session=False makes Flask-SocketIO share the Flask-Login session
     # so current_user works in SocketIO event handlers

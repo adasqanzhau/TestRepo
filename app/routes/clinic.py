@@ -56,6 +56,10 @@ def save_logo(file):
     return _save_image(file, 'clinics', ALLOWED_LOGO_EXTENSIONS)
 
 
+# ---------------------------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------------------------
+
 @clinic.route('/dashboard')
 @login_required
 @clinic_admin_required
@@ -66,6 +70,7 @@ def dashboard():
         clinic_id=clinic_obj.id, role='doctor', is_active=True
     ).count()
 
+    # Count patients: those assigned to this clinic OR who have appointments here
     patients_by_clinic = db.session.query(User.id).filter(
         User.clinic_id == clinic_obj.id, User.role == 'patient'
     )
@@ -106,6 +111,10 @@ def dashboard():
         revenue=revenue,
     )
 
+
+# ---------------------------------------------------------------------------
+# Manage Doctors
+# ---------------------------------------------------------------------------
 
 @clinic.route('/doctors')
 @login_required
@@ -165,6 +174,7 @@ def edit_doctor(doctor_id):
 
     form = DoctorForm(obj=doctor)
     if form.validate_on_submit():
+        # Check email uniqueness if changed
         if form.email.data != doctor.email:
             existing = User.query.filter_by(email=form.email.data).first()
             if existing:
@@ -211,6 +221,10 @@ def delete_doctor(doctor_id):
     return redirect(url_for('clinic.doctors'))
 
 
+# ---------------------------------------------------------------------------
+# Patients
+# ---------------------------------------------------------------------------
+
 @clinic.route('/patients')
 @login_required
 @clinic_admin_required
@@ -225,6 +239,10 @@ def patients():
     )
     return render_template('clinic/patients.html', patients=patients_list)
 
+
+# ---------------------------------------------------------------------------
+# Appointments
+# ---------------------------------------------------------------------------
 
 @clinic.route('/appointments')
 @login_required
@@ -253,6 +271,10 @@ def appointments():
     ).paginate(page=page, per_page=20, error_out=False)
     return render_template('clinic/appointments.html', appointments=appointments_list)
 
+
+# ---------------------------------------------------------------------------
+# Clinic Settings
+# ---------------------------------------------------------------------------
 
 @clinic.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -293,12 +315,18 @@ def settings():
 
     return render_template('clinic/settings.html', form=form, clinic=clinic_obj)
 
+
+# ---------------------------------------------------------------------------
+# Statistics
+# ---------------------------------------------------------------------------
+
 @clinic.route('/statistics')
 @login_required
 @clinic_admin_required
 def statistics():
     clinic_obj = db.session.get(Clinic, current_user.clinic_id) or abort(404)
 
+    # Total counts
     total_doctors = User.query.filter_by(
         clinic_id=clinic_obj.id, role='doctor', is_active=True
     ).count()
@@ -311,6 +339,7 @@ def statistics():
         clinic_id=clinic_obj.id, status='cancelled'
     ).count()
 
+    # Revenue (single aggregate query instead of N+1)
     total_revenue = (
         db.session.query(db.func.coalesce(db.func.sum(User.consultation_price), 0))
         .join(Appointment, Appointment.doctor_id == User.id)
@@ -318,11 +347,12 @@ def statistics():
         .scalar()
     ) or 0
 
+    # Monthly revenue for the last 6 months (correct calendar math)
     from calendar import monthrange
     monthly_revenue = []
     today = date.today()
     for i in range(5, -1, -1):
-
+        # Walk back i months correctly
         month = today.month - i
         year = today.year
         while month <= 0:
@@ -351,7 +381,7 @@ def statistics():
             'revenue': rev,
         })
 
-
+    # Average rating
     doctor_ids = [d.id for d in User.query.filter_by(
         clinic_id=clinic_obj.id, role='doctor'
     ).all()]
@@ -362,7 +392,7 @@ def statistics():
         ).scalar()
         avg_rating = round(result, 2) if result else None
 
-
+    # Total patients for this clinic
     patients_by_clinic = db.session.query(User.id).filter(
         User.clinic_id == clinic_obj.id, User.role == 'patient'
     )
@@ -380,6 +410,7 @@ def statistics():
         .count()
     )
 
+    # Top doctors by appointment count
     top_doctors_raw = (
         db.session.query(
             User,
@@ -392,12 +423,13 @@ def statistics():
         .limit(5)
         .all()
     )
-
+    # Flatten to objects the template can access directly
     top_doctors = []
     for user_obj, apt_count in top_doctors_raw:
         user_obj.appointments_count = apt_count
         top_doctors.append(user_obj)
 
+    # Doctor reviews for this clinic
     doctor_reviews = []
     if doctor_ids:
         doctor_reviews = (
@@ -424,6 +456,10 @@ def statistics():
     )
 
 
+# ---------------------------------------------------------------------------
+# Profile
+# ---------------------------------------------------------------------------
+
 @clinic.route('/profile', methods=['GET', 'POST'])
 @login_required
 @clinic_admin_required
@@ -446,6 +482,10 @@ def profile():
 
     return render_template('clinic/profile.html', form=form)
 
+
+# ---------------------------------------------------------------------------
+# Notifications
+# ---------------------------------------------------------------------------
 
 @clinic.route('/notifications')
 @login_required

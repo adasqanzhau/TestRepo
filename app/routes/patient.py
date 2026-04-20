@@ -22,6 +22,11 @@ def patient_required(f):
 
     return decorated_function
 
+
+# ---------------------------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------------------------
+
 @patient_bp.route('/')
 @login_required
 @patient_required
@@ -86,6 +91,10 @@ def index():
     )
 
 
+# ---------------------------------------------------------------------------
+# Browse doctors
+# ---------------------------------------------------------------------------
+
 @patient_bp.route('/doctors')
 @login_required
 @patient_required
@@ -95,6 +104,7 @@ def doctors():
 
     query = User.query.filter_by(role='doctor', is_active=True)
 
+    # Show doctors from the patient's clinic
     if current_user.clinic_id:
         query = query.filter_by(clinic_id=current_user.clinic_id)
 
@@ -113,6 +123,7 @@ def doctors():
 
     doctors_list = query.order_by(User.last_name).all()
 
+    # Collect unique specializations for the filter dropdown
     spec_query = (
         db.session.query(User.specialization)
         .filter(User.role == 'doctor', User.is_active == True, User.specialization.isnot(None))
@@ -130,12 +141,17 @@ def doctors():
     )
 
 
+# ---------------------------------------------------------------------------
+# Book appointment
+# ---------------------------------------------------------------------------
+
 def _generate_time_slots(clinic, selected_date, doctor_id):
     """Return a list of available 30-min time slot strings for the given date."""
     if not clinic:
         return []
 
     working_days = [int(d) for d in clinic.working_days.split(',') if d.strip()]
+    # Python isoweekday: Mon=1 .. Sun=7
     if selected_date.isoweekday() not in working_days:
         return []
 
@@ -149,6 +165,7 @@ def _generate_time_slots(clinic, selected_date, doctor_id):
         hour=end_h, minute=end_m
     )
 
+    # Fetch already booked slots for this doctor on the selected date
     day_start = datetime.combine(selected_date, datetime.min.time())
     day_end = day_start + timedelta(days=1)
 
@@ -180,12 +197,14 @@ def _generate_time_slots(clinic, selected_date, doctor_id):
 def book_appointment():
     form = AppointmentForm()
 
+    # Populate doctor choices
     doctor_query = User.query.filter_by(role='doctor', is_active=True)
     if current_user.clinic_id:
         doctor_query = doctor_query.filter_by(clinic_id=current_user.clinic_id)
     doctor_list = doctor_query.order_by(User.last_name).all()
     form.doctor_id.choices = [(d.id, f'{d.full_name} — {d.specialization or ""}') for d in doctor_list]
 
+    # Determine selected date & doctor for slot generation
     selected_date = None
     time_slots = []
 
@@ -201,6 +220,7 @@ def book_appointment():
             except ValueError:
                 selected_date = None
 
+    # Get clinic from the selected doctor (allows patients without clinic_id to book)
     clinic = None
     if doctor_id:
         selected_doctor = db.session.get(User, doctor_id)
@@ -226,6 +246,7 @@ def book_appointment():
             hour=hour, minute=minute
         )
 
+        # Double-check that the slot is still free
         existing = Appointment.query.filter_by(
             doctor_id=doctor_id,
             scheduled_time=scheduled_dt,
@@ -297,6 +318,7 @@ def api_time_slots():
     except ValueError:
         return jsonify([])
 
+    # Get clinic from the selected doctor (allows patients without clinic_id to book)
     clinic = None
     doctor = db.session.get(User, doctor_id)
     if doctor and doctor.clinic_id:
@@ -304,6 +326,10 @@ def api_time_slots():
     slots = _generate_time_slots(clinic, selected_date, doctor_id) if clinic else []
     return jsonify({'slots': slots})
 
+
+# ---------------------------------------------------------------------------
+# Appointments list
+# ---------------------------------------------------------------------------
 
 @patient_bp.route('/appointments/<int:appointment_id>/cancel', methods=['POST'])
 @login_required
@@ -344,6 +370,10 @@ def appointments():
     )
 
 
+# ---------------------------------------------------------------------------
+# Medical records
+# ---------------------------------------------------------------------------
+
 @patient_bp.route('/medical-records')
 @login_required
 @patient_required
@@ -358,6 +388,10 @@ def medical_records():
 
     return render_template('patient/medical_records.html', records=records, record_type=record_type)
 
+
+# ---------------------------------------------------------------------------
+# Prescriptions
+# ---------------------------------------------------------------------------
 
 @patient_bp.route('/prescriptions')
 @login_required
@@ -374,6 +408,9 @@ def prescriptions():
     return render_template('patient/prescriptions.html', prescriptions=prescriptions_list)
 
 
+# ---------------------------------------------------------------------------
+# Profile
+# ---------------------------------------------------------------------------
 
 @patient_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -412,11 +449,15 @@ def profile():
     return render_template('patient/profile.html', form=form)
 
 
+# ---------------------------------------------------------------------------
+# Reviews
+# ---------------------------------------------------------------------------
+
 @patient_bp.route('/reviews')
 @login_required
 @patient_required
 def reviews():
-
+    # Completed appointments that have not been reviewed yet
     reviewed_appointment_ids = {
         r.appointment_id
         for r in Review.query.filter_by(patient_id=current_user.id).all()
@@ -497,6 +538,11 @@ def leave_review(appointment_id):
         appointment=appointment,
     )
 
+
+# ---------------------------------------------------------------------------
+# Notifications
+# ---------------------------------------------------------------------------
+
 @patient_bp.route('/notifications')
 @login_required
 @patient_required
@@ -543,6 +589,10 @@ def mark_all_notifications_read():
     flash('Все уведомления отмечены как прочитанные.', 'success')
     return redirect(url_for('patient.notifications'))
 
+
+# ---------------------------------------------------------------------------
+# Health tracker (symptom log)
+# ---------------------------------------------------------------------------
 
 @patient_bp.route('/health-tracker', methods=['GET', 'POST'])
 @login_required

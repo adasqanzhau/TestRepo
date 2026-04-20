@@ -54,6 +54,7 @@ def send():
     if not user_message_text:
         return jsonify({'error': 'Сообщение не может быть пустым'}), 400
 
+    # Save user message
     user_message = ChatMessage(
         user_id=current_user.id,
         role='user',
@@ -62,6 +63,7 @@ def send():
     db.session.add(user_message)
     db.session.commit()
 
+    # Build conversation history for OpenAI
     history = (
         ChatMessage.query
         .filter_by(user_id=current_user.id)
@@ -75,9 +77,11 @@ def send():
     for msg in history:
         messages.append({'role': msg.role, 'content': msg.content})
 
+    # Get AI response via tpool-isolated call
     response_text, error = chat_completion(messages)
     assistant_text = response_text or error or 'Извините, сервис временно недоступен.'
 
+    # Save assistant response
     assistant_message = ChatMessage(
         user_id=current_user.id,
         role='assistant',

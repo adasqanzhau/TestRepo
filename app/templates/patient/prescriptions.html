@@ -34,6 +34,7 @@
         </div>
     </div>
 
+    <!-- Prescriptions -->
     <div class="row g-4">
         {% for prescription in prescriptions %}
         <div class="col-lg-6">
@@ -53,6 +54,7 @@
                     </small>
                 </div>
                 <div class="card-body">
+                    <!-- Diagnosis -->
                     {% if prescription.diagnosis %}
                     <div class="section-divider mb-3">
                         <h6 class="text-uppercase small fw-bold text-muted mb-1">Диагноз</h6>
@@ -60,6 +62,7 @@
                     </div>
                     {% endif %}
 
+                    <!-- Medications -->
                     {% if prescription.medications %}
                     <div class="mb-3">
                         <h6 class="text-uppercase small fw-bold text-muted mb-2">
@@ -76,6 +79,7 @@
                     </div>
                     {% endif %}
 
+                    <!-- Recommendations -->
                     {% if prescription.recommendations %}
                     <div class="section-divider">
                         <h6 class="text-uppercase small fw-bold text-muted mb-1">Рекомендации</h6>

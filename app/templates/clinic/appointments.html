@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Записи клиники - Qamqor{% endblock %}
+{% block title %}Записи клиники - MediPlatform{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">
@@ -13,6 +14,7 @@
         </div>
     </div>
 
+    <!-- Filters -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form method="GET" action="{{ url_for('clinic.appointments') }}" class="row g-3 align-items-end">
@@ -46,6 +48,7 @@
         </div>
     </div>
 
+    <!-- Appointments Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             {% if appointments.items %}
@@ -128,6 +131,7 @@
                 </table>
             </div>
 
+            <!-- Pagination -->
             {% if appointments.pages > 1 %}
             <div class="card-footer bg-white border-top">
                 <nav aria-label="Навигация по страницам">
@@ -178,6 +182,7 @@
     </div>
 </div>
 
+<!-- Hidden data for appointment details overlay (rendered outside card to avoid stacking issues) -->
 <script type="application/json" id="apptDetailsData">
 [
 {% for appointment in appointments.items %}
