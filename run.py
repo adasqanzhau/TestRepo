@@ -9,12 +9,11 @@ app = create_app()
 
 def _seed_demo_data():
     """Create demo accounts if the database is empty (first deploy)."""
-    # Skip if superadmin already exists
-    if User.query.filter_by(email='admin@mediplatform.kz').first():
+    if User.query.filter_by(email='admin@qamqor.kz').first():
         return
 
     admin = User(
-        email='admin@mediplatform.kz',
+        email='admin@qamqor.kz',
         first_name='Администратор',
         last_name='Платформы',
         role='superadmin',
@@ -40,7 +39,7 @@ def _seed_demo_data():
     db.session.flush()
 
     clinic_admin = User(
-        email='clinic@mediplatform.kz',
+        email='clinic@qamqor.kz',
         first_name='Админ',
         last_name='Клиники',
         role='clinic_admin',
@@ -51,7 +50,7 @@ def _seed_demo_data():
     db.session.add(clinic_admin)
 
     doctor = User(
-        email='doctor@mediplatform.kz',
+        email='doctor@qamqor.kz',
         first_name='Арман',
         last_name='Сериков',
         role='doctor',
@@ -66,7 +65,7 @@ def _seed_demo_data():
     db.session.add(doctor)
 
     patient = User(
-        email='patient@mediplatform.kz',
+        email='patient@qamqor.kz',
         first_name='Айгерим',
         last_name='Нурланова',
         role='patient',
@@ -80,7 +79,6 @@ def _seed_demo_data():
     db.session.commit()
 
 
-# Auto-create tables and seed demo data on startup
 with app.app_context():
     db.create_all()
     _seed_demo_data()
@@ -94,10 +92,10 @@ def init_db():
     print('Database initialized successfully!')
     print('')
     print('Demo accounts (see .env-example for passwords):')
-    print('  Superadmin:    admin@mediplatform.kz')
-    print('  Clinic Admin:  clinic@mediplatform.kz')
-    print('  Doctor:        doctor@mediplatform.kz')
-    print('  Patient:       patient@mediplatform.kz')
+    print('  Superadmin:    admin@qamqor.kz')
+    print('  Clinic Admin:  clinic@qamqor.kz')
+    print('  Doctor:        doctor@qamqor.kz')
+    print('  Patient:       patient@qamqor.kz')
 
 
 if __name__ == '__main__':
