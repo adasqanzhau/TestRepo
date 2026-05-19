@@ -4,18 +4,18 @@
 
 /* ---------- CSS Custom Properties ---------- */
 :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-light: #3b82f6;
-    --primary-bg: #eff6ff;
-    --secondary: #10b981;
-    --secondary-dark: #059669;
-    --secondary-light: #34d399;
+    --primary: #0d9488;
+    --primary-dark: #0f766e;
+    --primary-light: #14b8a6;
+    --primary-bg: #f0fdfa;
+    --secondary: #6366f1;
+    --secondary-dark: #4f46e5;
+    --secondary-light: #818cf8;
     --accent: #8b5cf6;
     --accent-dark: #7c3aed;
-    --bg: #f0f4f8;
+    --bg: #f8fafc;
     --card-bg: #ffffff;
-    --text: #1e293b;
+    --text: #0f172a;
     --text-light: #64748b;
     --text-muted: #94a3b8;
     --border: #e2e8f0;
@@ -24,16 +24,16 @@
     --warning: #f59e0b;
     --info: #06b6d4;
     --success: #10b981;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --radius-lg: 16px;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 12px 24px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.12);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-lg: 20px;
     --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --sidebar-width: 260px;
-    --navbar-height: 64px;
+    --navbar-height: 68px;
 }
 
 /* ---------- Global ---------- */
@@ -44,7 +44,7 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.6;
@@ -87,19 +87,33 @@ a:hover {
 
 /* ---------- Navbar ---------- */
 .navbar {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--accent) 100%);
-    backdrop-filter: blur(20px);
-    box-shadow: var(--shadow-md);
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
     min-height: var(--navbar-height);
     z-index: 1050;
     border: none;
     padding: 0 1rem;
 }
 
+.navbar .brand-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.65rem;
+    font-size: 1rem;
+    color: #fff;
+}
+
 /* Mobile collapsed menu */
 @media (max-width: 991.98px) {
     .navbar .navbar-collapse {
-        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        background: rgba(15, 23, 42, 0.98);
         border-radius: 0 0 var(--radius) var(--radius);
         padding: 0.75rem 1rem;
         margin: 0.5rem -1rem -0.5rem;
@@ -120,15 +134,33 @@ a:hover {
     color: #fff !important;
 }
 
-.navbar-brand i {
-    color: var(--secondary-light);
-    font-size: 1.5rem;
-    animation: pulse-heart 2s ease-in-out infinite;
+/* Language switcher */
+.lang-switcher .btn-lang {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
 }
 
-@keyframes pulse-heart {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+.lang-switcher .btn-lang:hover,
+.lang-switcher .btn-lang:focus {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.lang-switcher-light .btn-lang,
+.navbar-landing .lang-switcher .btn-lang {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.navbar-landing.scrolled .lang-switcher .btn-lang {
+    background: rgba(15, 23, 42, 0.06);
+    border-color: var(--border);
+    color: var(--text);
 }
 
 .navbar .nav-link {
@@ -410,6 +442,22 @@ a:hover {
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
     overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--shadow);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+    border: none;
 }
 
 .card:hover {

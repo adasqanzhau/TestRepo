@@ -45,8 +45,16 @@ def create_app(config_class=Config):
     csrf.init_app(app)
 
     login_manager.login_view = 'auth.login'
-    login_manager.login_message = 'Пожалуйста, войдите в систему.'
     login_manager.login_message_category = 'warning'
+
+    from app.i18n import init_app as init_i18n, translate
+    init_i18n(app)
+
+    @login_manager.unauthorized_handler
+    def _unauthorized():
+        from flask import flash, redirect, request, url_for
+        flash(translate('auth.login_required'), 'warning')
+        return redirect(url_for('auth.login', next=request.url))
 
     # Ensure upload folder exists
     os.makedirs(app.config.get('UPLOAD_FOLDER', 'app/static/uploads'), exist_ok=True)
@@ -59,8 +67,10 @@ def create_app(config_class=Config):
     from app.routes.videocall import videocall_bp
     from app.routes.chatbot import chatbot_bp
     from app.routes.api import api_bp
+    from app.routes.locale import locale_bp
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(locale_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(clinic_bp, url_prefix='/clinic')
     app.register_blueprint(doctor_bp)

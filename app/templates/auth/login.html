@@ -1,114 +1,47 @@
 {% extends 'base.html' %}
+{% from 'macros/lang_switcher.html' import lang_switcher %}
 
-{% block title %}Вход в систему{% endblock %}
+{% block title %}{{ _('auth.login_title') }} — MediPlatform{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/auth.css') }}" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-<style>
-    body { padding-top: 0 !important; background: none !important; }
-    .navbar { display: none !important; }
-    .app-footer { display: none !important; }
-    .main-content { padding: 0 !important; min-height: auto !important; }
-    .flash-container { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 500px; }
-    .auth-wrapper {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 50%, #6610f2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem 1rem;
-    }
-    .auth-card {
-        width: 100%;
-        max-width: 420px;
-        border: none;
-        border-radius: 1.25rem;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        overflow: hidden;
-    }
-    .auth-card .card-body {
-        padding: 2.5rem 2rem;
-    }
-    .auth-icon {
-        width: 72px;
-        height: 72px;
-        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.25rem;
-        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
-    }
-    .auth-icon i {
-        font-size: 2rem;
-        color: #fff;
-    }
-    .btn-gradient {
-        background: linear-gradient(135deg, #0d6efd, #6610f2);
-        border: none;
-        color: #fff;
-        padding: 0.75rem 1.5rem;
-        font-size: 1.05rem;
-        border-radius: 0.75rem;
-        transition: opacity 0.2s, transform 0.2s;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .btn-gradient:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-        color: #fff;
-    }
-    .form-floating > .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-    }
-</style>
+<script>document.body.classList.add('auth-layout'); document.documentElement.classList.add('auth-page');</script>
 
-<div class="auth-wrapper">
-    <div class="card auth-card">
-        <div class="card-body">
-            <div class="auth-icon">
-                <i class="bi bi-heart-pulse"></i>
-            </div>
-            <h3 class="text-center fw-bold mb-4">Вход в систему</h3>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
+<div class="auth-shell">
+    <div class="auth-brand-panel">
+        <h2><i class="fas fa-heart-pulse me-2"></i>MediPlatform</h2>
+        <p>{{ _('landing.hero_sub') }}</p>
+        <div class="mt-4 d-flex flex-wrap gap-2">
+            <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">{{ _('landing.trust_hipaa') }}</span>
+            <span class="badge bg-white bg-opacity-10 border border-white border-opacity-25 px-3 py-2">{{ _('landing.trust_support') }}</span>
+        </div>
+    </div>
+    <div class="auth-form-panel position-relative">
+        <div class="auth-top-bar">{{ lang_switcher() }}</div>
+        <div class="auth-card-modern">
+            <div class="auth-logo"><i class="fas fa-sign-in-alt"></i></div>
+            <h3>{{ _('auth.login_title') }}</h3>
+            <p class="subtitle">{{ _('auth.welcome_sub') }}</p>
             <form method="POST" action="{{ url_for('auth.login') }}">
                 {{ form.hidden_tag() if form is defined }}
-
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
-                    <label for="email">Email</label>
+                    <label for="email">{{ _('common.email') }}</label>
                 </div>
-
                 <div class="form-floating mb-4">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Пароль" required>
-                    <label for="password">Пароль</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <label for="password">{{ _('common.password') }}</label>
                 </div>
-
-                <div class="d-grid mb-3">
-                    <button type="submit" class="btn btn-gradient">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Войти
-                    </button>
-                </div>
+                <button type="submit" class="btn btn-auth-primary mb-3">
+                    <i class="fas fa-arrow-right-to-bracket me-2"></i>{{ _('auth.login_btn') }}
+                </button>
             </form>
-
-            <p class="text-center text-muted mb-0">
-                Нет аккаунта?
-                <a href="{{ url_for('auth.register') }}" class="fw-semibold text-decoration-none">Зарегистрируйтесь</a>
+            <p class="text-center text-muted mb-0 small">
+                {{ _('auth.no_account') }}
+                <a href="{{ url_for('auth.register') }}" class="fw-semibold">{{ _('auth.register_link') }}</a>
             </p>
         </div>
     </div>

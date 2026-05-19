@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     notificationList.innerHTML =
                         '<div class="text-center py-4 text-muted">' +
                             '<i class="fas fa-bell-slash fa-2x mb-2 d-block"></i>' +
-                            '<span class="small">Нет новых уведомлений</span>' +
+                            '<span class="small">' + escapeHtml(document.body.getAttribute('data-i18n-notif-empty') || 'No new notifications') + '</span>' +
                         '</div>';
                     return;
                 }
